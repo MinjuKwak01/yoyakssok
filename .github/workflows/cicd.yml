@@ -26,6 +26,8 @@ jobs:
     with:
       environment: prod
     secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
       SSH_USERNAME: ${{ secrets.PROD_SSH_USERNAME }}
       SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
@@ -42,6 +44,8 @@ jobs:
     with:
       environment: dev
     secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
       SSH_USERNAME: ${{ secrets.DEV_SSH_USERNAME }}
       SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
