@@ -5,7 +5,7 @@ async def verify_token(token: str):
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
-                "https://fourever.duckdns.org/api/upload/isAvailable",
+                "https://yoyakssok-dev.duckdns.org/api/upload/isAvailable",
                 headers={"Authorization": f"Bearer {token}"},
                 timeout=10.0
             )
