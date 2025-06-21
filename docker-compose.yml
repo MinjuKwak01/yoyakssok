@@ -31,7 +31,7 @@ services:
     networks: #사용할 네트워크 지정
       - forever-network
   backend:
-    image : minjukwak/forever-dev:latest
+    image : minjukwak/yoyakssok-dev:latest
     container_name: forever-app
     restart: always
     env_file:
