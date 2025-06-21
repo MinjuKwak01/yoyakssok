@@ -1,0 +1,90 @@
+groups:
+  - name: forever-app-alerts
+    rules:
+      # CPU 사용률 90% 초과 알림
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
+        for: 2m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "높은 CPU 사용률 감지"
+          description: "인스턴스 {{ $labels.instance }}의 CPU 사용률이 {{ $value }}%로 90%를 초과했습니다."
+
+      # Spring Boot 애플리케이션 CPU 사용률
+      - alert: HighApplicationCPUUsage
+        expr: system_cpu_usage * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+          service: spring-boot
+        annotations:
+          summary: "Spring Boot 애플리케이션 높은 CPU 사용률"
+          description: "Spring Boot 애플리케이션의 CPU 사용률이 {{ $value }}%로 90%를 초과했습니다."
+
+      # 메모리 사용률 85% 초과 알림
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "높은 메모리 사용률 감지"
+          description: "인스턴스 {{ $labels.instance }}의 메모리 사용률이 {{ $value }}%로 85%를 초과했습니다."
+
+      # Spring Boot 애플리케이션 다운 감지
+      - alert: SpringBootAppDown
+        expr: up{job="spring-boot-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: spring-boot
+        annotations:
+          summary: "Spring Boot 애플리케이션 다운"
+          description: "Spring Boot 애플리케이션이 {{ $value }}분 동안 응답하지 않습니다."
+
+      # HTTP 응답 시간 지연 알림
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job="spring-boot-app"}[5m])) by (le)) > 2
+        for: 3m
+        labels:
+          severity: warning
+          service: spring-boot
+        annotations:
+          summary: "높은 HTTP 응답 시간"
+          description: "95%의 HTTP 요청이 {{ $value }}초 이상 소요되고 있습니다."
+
+      # HTTP 에러율 5% 초과 알림
+      - alert: HighErrorRate
+        expr: (sum(rate(http_server_requests_total{job="spring-boot-app",status=~"5.."}[5m])) / sum(rate(http_server_requests_total{job="spring-boot-app"}[5m]))) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: spring-boot
+        annotations:
+          summary: "높은 HTTP 에러율"
+          description: "HTTP 5xx 에러율이 {{ $value }}%로 5%를 초과했습니다."
+
+      # 데이터베이스 연결 풀 사용률 90% 초과
+      - alert: HighDatabaseConnectionUsage
+        expr: (hikaricp_connections_active / hikaricp_connections_max) * 100 > 90
+        for: 2m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "높은 데이터베이스 연결 풀 사용률"
+          description: "데이터베이스 연결 풀 사용률이 {{ $value }}%로 90%를 초과했습니다."
+
+      # 디스크 사용률 80% 초과 알림
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "높은 디스크 사용률"
+          description: "{{ $labels.mountpoint }}의 디스크 사용률이 {{ $value }}%로 80%를 초과했습니다."

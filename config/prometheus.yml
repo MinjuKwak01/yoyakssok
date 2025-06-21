@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "/etc/prometheus/alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - forever-alertmanager:9093
+
+scrape_configs:
+  # Prometheus 자체 모니터링
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Spring Boot 애플리케이션 (Actuator 메트릭)
+  - job_name: 'spring-boot-app'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['forever-app:8080']
+    scrape_interval: 10s
+
+  # 시스템 메트릭 (Node Exporter)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['forever-node-exporter:9100']
+
+  # Alertmanager 모니터링
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['forever-alertmanager:9093']
+
+  # Grafana 모니터링
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['forever-grafana:3000']
