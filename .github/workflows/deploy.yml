@@ -28,7 +28,7 @@ jobs:
         uses: appleboy/ssh-action@master
         env:
           REPO: ${{ secrets.REPO }}
-          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+          ENVIRONMENT: ${{ inputs.environment }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}

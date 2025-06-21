@@ -23,13 +23,14 @@ jobs:
     if: github.ref == 'refs/heads/production'
     name: Production 서버 배포
     uses: ./.github/workflows/deploy.yml
+    with:
+      environment: prod
     secrets:
       SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
       SSH_USERNAME: ${{ secrets.PROD_SSH_USERNAME }}
       SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
       SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
       REPO: ${{ secrets.REPO }}
-      ENVIRONMENT: prod
       WORKSPACE: ${{ secrets.PROD_WORKSPACE }}
       DEPLOY_SCRIPT: ${{ secrets.PROD_DEPLOY_SCRIPT }}
 
@@ -38,12 +39,13 @@ jobs:
     if: github.ref == 'refs/heads/dev'
     name: Dev 서버 배포
     uses: ./.github/workflows/deploy.yml
+    with:
+      environment: dev
     secrets:
       SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
       SSH_USERNAME: ${{ secrets.DEV_SSH_USERNAME }}
       SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
       SSH_PORT: ${{ secrets.DEV_SSH_PORT }}
       REPO: ${{ secrets.REPO }}
-      ENVIRONMENT: dev
       WORKSPACE: ${{ secrets.DEV_WORKSPACE }}
       DEPLOY_SCRIPT: ${{ secrets.DEV_DEPLOY_SCRIPT }}
