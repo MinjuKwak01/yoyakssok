@@ -44,5 +44,5 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
 
         run: |
-          cd BE/forever
+          cd BE
           ./gradlew jib
