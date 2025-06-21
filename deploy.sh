@@ -33,10 +33,6 @@ else
     docker compose -f $COMPOSE_FILE pull backend
 fi
 
-# 기존 컨테이너 중지
-echo "기존 컨테이너 중지 중..."
-docker compose -f $COMPOSE_FILE down
-
 # 도커 컴포즈 실행
 echo "Docker Compose 실행 중..."
 if DOCKER_IMAGE=$DOCKER_IMAGE docker compose -f $COMPOSE_FILE up -d; then
