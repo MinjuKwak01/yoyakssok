@@ -29,6 +29,7 @@ jobs:
       SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
       SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
       REPO: ${{ secrets.REPO }}
+      ENVIRONMENT: prod
       WORKSPACE: ${{ secrets.PROD_WORKSPACE }}
       DEPLOY_SCRIPT: ${{ secrets.PROD_DEPLOY_SCRIPT }}
 
@@ -43,5 +44,6 @@ jobs:
       SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
       SSH_PORT: ${{ secrets.DEV_SSH_PORT }}
       REPO: ${{ secrets.REPO }}
+      ENVIRONMENT: dev
       WORKSPACE: ${{ secrets.DEV_WORKSPACE }}
       DEPLOY_SCRIPT: ${{ secrets.DEV_DEPLOY_SCRIPT }}

@@ -89,8 +89,8 @@ services:
       - grafana-data:/var/lib/grafana
       - ./config/grafana/provisioning:/etc/grafana/provisioning
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: weareforever
-      GF_SERVER_ROOT_URL: https://yoyakssok.com/grafana
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SERVER_ROOT_URL: https://yoyakssok-dev.duckdns.org/grafana
       GF_USERS_ALLOW_SIGN_UP: false
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
