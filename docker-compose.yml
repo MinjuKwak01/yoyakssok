@@ -35,7 +35,7 @@ services:
     container_name: forever-app
     restart: always
     env_file:
-      - ./BE/forever/.env
+      - ./BE/.env
     ports:
       - "8080:8080"
     depends_on:
