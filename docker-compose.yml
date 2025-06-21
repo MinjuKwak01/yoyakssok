@@ -128,6 +128,8 @@ services:
     volumes:
       - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
       - alertmanager-data:/alertmanager
+    env_file:
+      - .env
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--storage.path=/alertmanager'
