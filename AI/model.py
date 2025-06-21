@@ -236,7 +236,7 @@ async def make_questions(
         for attempt in range(max_retries):
             try:
                 response = await client.post(
-                    "https://fourever.duckdns.org/api/summary/complete",  
+                    "https://yoyakssok-dev.duckdns.org/api/summary/complete",  
                     headers={"Authorization": f"Bearer {token}"},
                     json={"isComplete": True},
                     timeout=10.0
