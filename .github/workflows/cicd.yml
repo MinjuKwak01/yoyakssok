@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - production
+      - prod
       - dev
 concurrency:
   group: ${{ github.ref }}
@@ -20,7 +20,7 @@ jobs:
 
   deploy-to-production:
     needs: call-build-workflow
-    if: github.ref == 'refs/heads/production'
+    if: github.ref == 'refs/heads/prod'
     name: Production 서버 배포
     uses: ./.github/workflows/deploy.yml
     with:
