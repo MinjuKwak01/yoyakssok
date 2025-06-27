@@ -18,7 +18,7 @@ public class DailyTokenRefreshScheduler {
     private final MemberDomainRepository memberRepository;
     
     /**
-     * 매일 자정에 모든 활성 회원의 토큰을 3개로 충전합니다.
+     * 매일 자정에 모든 활성 회원의 토큰을 100개로 충전합니다.
      */
     @Scheduled(cron = "0 0 0 * * *")  // 매일 자정 실행
     @Transactional

@@ -43,7 +43,7 @@ public class Member extends BaseTimeEntity {
 
     @Builder.Default
     @Column
-    private int availableTokens = 3;
+    private int availableTokens = 100;
 
     @Builder.Default
     @Column(name = "total_usage_count")
@@ -104,7 +104,7 @@ public class Member extends BaseTimeEntity {
     }
 
     public void refreshDailyTokens() {
-        this.availableTokens = 3;
+        this.availableTokens = 100;
         this.lastTokenRefreshDate = LocalDate.now();
     }
 
