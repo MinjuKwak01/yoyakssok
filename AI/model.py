@@ -77,7 +77,8 @@ async def summarize_file(
         summary_input = upload_file.read()
 
     summary_text = """input : {input} 
-    \n 위 input은 학생들의 학습 자료로서 제공 된 내용입니다."""
+    \n 위 input은 학생들의 학습 자료로서 제공 된 내용입니다.
+    \n 해당 내용을 자세히 요약해주세요."""
 
     summary_context = """\n 
     학습 자료로서 복잡하고 전문적인 용어들이 자주 등장하며 용어의 중요도가 높은 편입니다.
@@ -94,19 +95,13 @@ async def summarize_file(
     \n 예시로 '프로젝트 과제'에 대한 내용이 있다면 '프로젝트 과제 수행에는 레포트 작성, 유스케이스 작성 등이 있다'를 명시해주어야합니다.
     """
     summary_template = """
-    반환 형식은 다음과 같습니다. 이 프로젝트에서 일관적인 반환 형식은 매우 중요한 요소입니다. 
-
-    \n ### 1. 주제 1
-    \n 주제 1에 대한 내용 설명
-    ... 
-    \n 주제의 개수는 input에 따라 달라질 수 있습니다. 
-
+    답변은 마크다운 형식으로 작성해주세요. 
     """
 
     summary_prompt = (
         PromptTemplate.from_template(summary_text) 
-        + PromptTemplate.from_template(summary_context) 
-        + PromptTemplate.from_template(summary_example) 
+        # + PromptTemplate.from_template(summary_context) 
+        # + PromptTemplate.from_template(summary_example) 
         + summary_template
     )
 
