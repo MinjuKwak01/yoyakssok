@@ -11,11 +11,19 @@ import java.util.List;
 public class ApiResponseGenerator {
 
     public static ApiResponse<ApiResponse.SuccesCustomBody<Void>> success(final HttpStatus status) {
-        return new ApiResponse<>(new ApiResponse.SuccesCustomBody<>(200, null, null), status);
+        return new ApiResponse<>(new ApiResponse.SuccesCustomBody<>(status.value(), null, null), status);
     }
 
     public static <D> ApiResponse<ApiResponse.SuccesCustomBody<D>> success(final D data, final HttpStatus status) {
-        return new ApiResponse<>(new ApiResponse.SuccesCustomBody<>(200, null, data), status);
+        return new ApiResponse<>(new ApiResponse.SuccesCustomBody<>(status.value(), null, data), status);
+    }
+
+    public static <D> ApiResponse<ApiResponse.SuccesCustomBody<D>> success(final D data, final String message, final HttpStatus status) {
+        return new ApiResponse<>(new ApiResponse.SuccesCustomBody<>(status.value(), message, data), status);
+    }
+
+    public static ApiResponse<ApiResponse.SuccesCustomBody<Void>> success(final String message, final HttpStatus status) {
+        return new ApiResponse<>(new ApiResponse.SuccesCustomBody<>(status.value(), message, null), status);
     }
 
     public static ApiResponse<ApiResponse.FailureCustomBody> fail(final String message, final HttpStatus status) {
