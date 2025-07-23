@@ -78,25 +78,23 @@ async def summarize_file(
 
     summary_text = """
     아래 input은 학생들의 학습 자료로서 제공 된 내용입니다.
-    학습을 위해 한글로 요약해주세요. 요약 내용은 최대한 자세하게, 마크다운 형식으로 작성해주세요. \n
+    학습을 위해 한글로 보기 좋게 정리해주세요. 레포트는 최대한 자세하게, 마크다운 형식으로 작성해주세요. \n
     ###input
     {input} 
     \n """
 
-    # summary_context = """\n 
-    # 학습 자료로서 복잡하고 전문적인 용어들이 자주 등장하며 용어의 중요도가 높은 편입니다.
-    # 당신은 아주 중요한 시험을 준비하는 학생으로, input으로 제공된 학습 자료의 구체적이고 세부적인 내용까지 고려한 요약 레포트를 작성해야합니다.
-    # """
+    summary_context = """\n 
+    학습 자료로서 복잡하고 전문적인 용어들이 자주 등장하며 용어의 중요도가 높은 편입니다.
+    당신은 아주 중요한 시험을 준비하는 학생으로, input으로 제공된 학습 자료의 구체적이고 세부적인 내용까지 고려하여 정리합니다.
+    """
 
-    # summary_example = """
-    # 또한 각각의 내용은 충분히 자세하고 세부적인 사항들을 포함하고 있어야 합니다.  
-    # 문서의 끝부분까지 확실하게 설명해주세요.
-    # input의 내용에 없는 것을 추가하여 설명하지 마세요. 
-    # 요약에 부가적인 설명을 붙이지 마세요. 오로지 요약만 전달해야합니다.
+    summary_example = """
+    또한 각각의 내용은 충분히 자세하고 세부적인 사항들을 포함하고 있어야 합니다.  
+    문서의 끝부분까지 확실하게 설명해주세요.
+    input의 내용에 없는 것을 추가하여 설명하지 마세요. 
 
-    # \n 이 때 설명은 반드시 구체적인 내용을 작성해주세요.
-    # \n 예시로 '프로젝트 과제'에 대한 내용이 있다면 '프로젝트 과제 수행에는 레포트 작성, 유스케이스 작성 등이 있다'를 명시해주어야합니다.
-    # """
+    \n 이 때 설명은 반드시 구체적인 내용을 작성해주세요.
+    """
     # summary_template = """
     # 반환 형식은 다음과 같습니다. 이 프로젝트에서 일관적인 반환 형식은 매우 중요한 요소입니다. 
 
@@ -109,10 +107,11 @@ async def summarize_file(
 
     summary_prompt = (
         PromptTemplate.from_template(summary_text) 
-        # + PromptTemplate.from_template(summary_context) 
-        # + PromptTemplate.from_template(summary_example) 
+        + PromptTemplate.from_template(summary_context) 
+        + PromptTemplate.from_template(summary_example) 
         # + summary_template
     )
+
 
     ## api 이용한 pdf 문서 요약
     summary_query = summary_prompt.format(input = summary_input)
