@@ -73,7 +73,7 @@ async def summarize_file(
         return {"status":402, "message": "기본 이용을 전부 다 사용했습니다.", "data" : None}
 
     
-    with open(upload_file_path, "r") as upload_file:
+    with open(upload_file_path, "r", encoding="utf-8") as upload_file:
         summary_input = upload_file.read()
 
     summary_text = """
