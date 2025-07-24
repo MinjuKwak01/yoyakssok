@@ -26,6 +26,11 @@ kakao:
   client:
     id: ${KAKAO_CLIENT_ID}
 
+# Firebase FCM 설정
+firebase:
+  config:
+    file: firebase-service-account-key.json
+
 
 management:
   endpoints:

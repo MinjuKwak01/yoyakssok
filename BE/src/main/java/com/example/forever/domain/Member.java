@@ -78,6 +78,13 @@ public class Member extends BaseTimeEntity {
     @Builder.Default
     private MarketingAgreement marketingAgreement = MarketingAgreement.of(false);
 
+    @Builder.Default
+    @Column(name = "is_agreed_notification", nullable = false)
+    private Boolean isAgreedNotification = false;
+
+    @Column(name = "effective_date_notification")
+    private LocalDate effectiveDateNotification;
+
 
     public void updateRefreshToken(String token) {
         this.refreshToken = token;
@@ -139,6 +146,33 @@ public class Member extends BaseTimeEntity {
      */
     public void setMarketingAgreement(boolean isAgreed) {
         this.marketingAgreement = MarketingAgreement.of(isAgreed);
+    }
+
+    /**
+     * 푸시 알림 권한 동의
+     */
+    public void agreeNotification() {
+        this.isAgreedNotification = true;
+        this.effectiveDateNotification = LocalDate.now();
+    }
+
+    /**
+     * 푸시 알림 권한 거부
+     */
+    public void disagreeNotification() {
+        this.isAgreedNotification = false;
+        this.effectiveDateNotification = LocalDate.now();
+    }
+
+    /**
+     * 푸시 알림 권한 동의 상태 변경
+     */
+    public void updateNotificationAgreement(boolean isAgreed) {
+        if (isAgreed) {
+            agreeNotification();
+        } else {
+            disagreeNotification();
+        }
     }
 
 }
