@@ -12,10 +12,7 @@ CREATE TABLE IF NOT EXISTS device_tokens (
     CONSTRAINT fk_device_token_member 
         FOREIGN KEY (member_id) 
         REFERENCES member_tb(id) 
-        ON DELETE CASCADE,
-    
-    CONSTRAINT uk_device_tokens_member_fcm_token 
-        UNIQUE (member_id, fcm_token)
+        ON DELETE CASCADE
 );
 
 -- 마이그레이션 로그
@@ -29,5 +26,6 @@ CREATE TABLE IF NOT EXISTS device_tokens (
 --   - is_active: 토큰 활성화 상태 (기본값: TRUE)
 --   - created_at/updated_at: 생성/수정 시간
 -- 제약 조건:
---   - 회원당 동일한 FCM 토큰은 중복 불가 (UNIQUE 제약)
 --   - 회원 삭제 시 관련 토큰도 함께 삭제 (CASCADE)
+--   - UNIQUE 제약 조건 제거 (MySQL 키 길이 제한으로 인해)
+-- 참고: 중복 토큰 방지는 애플리케이션 레벨에서 처리

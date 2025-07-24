@@ -1,0 +1,162 @@
+### 푸시 알림 시스템 통합 테스트
+### 스케줄러 + FCM 발송 전체 플로우 테스트
+
+### 환경 변수 설정
+@baseUrl = http://localhost:8080
+@token = Bearer YOUR_JWT_TOKEN_HERE
+
+### =====================================================
+### 1단계: 기본 설정 확인
+### =====================================================
+
+### 1-1. 현재 알림 권한 상태 확인
+GET {{baseUrl}}/api/notification/permission
+Authorization: {{token}}
+Content-Type: application/json
+
+### 1-2. 알림 권한 동의로 변경 (필수)
+POST {{baseUrl}}/api/notification/permission
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "is_agreement": true
+}
+
+### 1-3. FCM 토큰 등록 (필수)
+POST {{baseUrl}}/api/device-tokens/register
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "fcmToken": "test_fcm_token_for_notification_system_testing_purposes_only"
+}
+
+###
+
+### =====================================================
+### 2단계: 문서 생성으로 알림 트리거 준비
+### =====================================================
+
+### 2-1. 첫 번째 문서 생성
+POST {{baseUrl}}/api/documents
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "title": "알림 테스트용 첫 번째 문서",
+  "summary": "푸시 알림 시스템 테스트를 위한 문서입니다."
+}
+
+### 2-2. 두 번째 문서 생성 (마일스톤 달성)
+POST {{baseUrl}}/api/documents
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "title": "알림 테스트용 두 번째 문서 - 마일스톤!",
+  "summary": "2개 문서 달성으로 마일스톤 알림이 발송되어야 합니다."
+}
+
+### 예상: 두 번째 문서 생성 시 즉시 마일스톤 알림 발송
+### "🎉 축하합니다!" - "요약왕에 도전해보세요!"
+
+###
+
+### =====================================================
+### 3단계: 알림 이력 확인 (관리자용 API - 필요시 구현)
+### =====================================================
+
+### 3-1. 내 알림 이력 조회 (향후 구현 예정)
+# GET {{baseUrl}}/api/notifications/history
+# Authorization: {{token}}
+# Content-Type: application/json
+
+###
+
+### =====================================================
+### 4단계: 문서 복습 알림 테스트 (시간 기반)
+### =====================================================
+
+### 4-1. 추가 문서 생성 (내일 복습 알림 대상)
+POST {{baseUrl}}/api/documents
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "title": "복습 알림 테스트 문서",
+  "summary": "이 문서는 내일 오후 6시에 복습 알림을 받게 됩니다."
+}
+
+### 참고: 실제 복습 알림은 다음날 오후 6시에 자동 발송됩니다.
+### "📚 복습 시간이에요!" - "잊으면 다 사라지니다... 어제 문제 지금 복습 안 하면 끝!"
+
+###
+
+### =====================================================
+### 5단계: 알림 설정 변경 테스트
+### =====================================================
+
+### 5-1. 알림 권한 거부로 변경
+POST {{baseUrl}}/api/notification/permission
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "is_agreement": false
+}
+
+### 5-2. 알림 거부 상태에서 문서 생성
+POST {{baseUrl}}/api/documents
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "title": "알림 거부 상태 테스트 문서",
+  "summary": "이 문서는 알림을 발송하지 않아야 합니다."
+}
+
+### 예상: 알림 발송되지 않음 (권한 거부 상태)
+
+### 5-3. 다시 알림 권한 동의로 복원
+POST {{baseUrl}}/api/notification/permission
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "is_agreement": true
+}
+
+###
+
+### =====================================================
+### 6단계: 최종 상태 확인
+### =====================================================
+
+### 6-1. 최종 알림 권한 상태
+GET {{baseUrl}}/api/notification/permission
+Authorization: {{token}}
+Content-Type: application/json
+
+### 6-2. 총 문서 개수 확인 (내 문서 목록 조회)
+GET {{baseUrl}}/api/documents
+Authorization: {{token}}
+Content-Type: application/json
+
+###
+
+### =====================================================
+### 테스트 시나리오 완료!
+### 
+### 검증된 기능:
+### ✅ 알림 권한 동의/거부 설정
+### ✅ FCM 토큰 등록
+### ✅ 문서 생성 시 실시간 마일스톤 알림 (2개 달성)
+### ✅ 알림 권한 거부 시 발송 차단
+### ✅ 문서 복습 알림 준비 (다음날 오후 6시 발송)
+### 
+### 실제 확인 방법:
+### 1. 모바일 앱에서 푸시 알림 수신 확인
+### 2. Firebase Console에서 메시지 발송 로그 확인
+### 3. 애플리케이션 로그에서 발송 성공/실패 확인
+### =====================================================
