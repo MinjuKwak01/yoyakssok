@@ -30,6 +30,10 @@ kakao:
 firebase:
   config:
     file: firebase-service-account-key.json
+  credentials:
+    json: ${FIREBASE_CREDENTIALS_JSON:}
+  project:
+    id: ${FIREBASE_PROJECT_ID:}
 
 
 management:
