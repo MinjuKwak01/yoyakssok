@@ -124,10 +124,9 @@ async def summarize_file(
     # """
 
     summary_prompt = (
-
+        + PromptTemplate.from_template(summary_text) 
         + PromptTemplate.from_template(summary_context) 
         + PromptTemplate.from_template(summary_example)
-        + PromptTemplate.from_template(summary_text) 
         # + summary_template
     )
 
