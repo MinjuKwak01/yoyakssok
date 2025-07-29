@@ -9,6 +9,7 @@ import fitz  # PyMuPDF
 import pymupdf4llm
 from utils.token_validator import verify_token
 import google.generativeai as genai
+import google.generativeai as genai
 from tempfile import NamedTemporaryFile
 
 from openai import OpenAI
@@ -25,6 +26,14 @@ SUMMARY_DIR = "summaries"
 os.makedirs(SUMMARY_DIR, exist_ok=True)
 
 load_dotenv()
+
+# client = OpenAI (
+#     api_key = os.getenv("OPENAI_API_KEY")
+# )
+
+
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 # client = OpenAI (
 #     api_key = os.getenv("OPENAI_API_KEY")
@@ -63,6 +72,7 @@ async def upload_file(
 async def summarize_file(
     upload_file_path: str,
     file_name: str,
+    # authorization: Optional[str] = Header(None, description="Bearer token")
     # authorization: Optional[str] = Header(None, description="Bearer token")
 ):
     # if not authorization or not authorization.startswith('Bearer '):
