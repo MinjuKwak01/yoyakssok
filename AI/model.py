@@ -8,7 +8,7 @@ from pydantic import BaseModel
 import fitz  # PyMuPDF
 import pymupdf4llm
 from utils.token_validator import verify_token
-
+import google.generativeai as genai
 from tempfile import NamedTemporaryFile
 
 from openai import OpenAI
@@ -26,9 +26,14 @@ os.makedirs(SUMMARY_DIR, exist_ok=True)
 
 load_dotenv()
 
-client = OpenAI (
-    api_key = os.getenv("OPENAI_API_KEY")
-)
+# client = OpenAI (
+#     api_key = os.getenv("OPENAI_API_KEY")
+# )
+
+
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+model = genai.GenerativeModel('gemini-2.5-flash')
+
 
 # 경로 설정
 @upload.post('/upload')
@@ -58,8 +63,10 @@ async def upload_file(
 async def summarize_file(
     upload_file_path: str,
     file_name: str,
-    authorization: Optional[str] = Header(None, description="Bearer token")
+    # authorization: Optional[str] = Header(None, description="Bearer token")
 ):
+    # if not authorization or not authorization.startswith('Bearer '):
+    #     return {"status":401, "message": "인증이 필요합니다", "data" : None}
     if not authorization or not authorization.startswith('Bearer '):
         return JSONResponse(
             status_code=401,
@@ -70,12 +77,15 @@ async def summarize_file(
             }
         )
     
-    token = authorization.split(' ')[1]
-    is_valid = await verify_token(token)
+    # token = authorization.split(' ')[1]
+    # is_valid = await verify_token(token)
 
-    if isinstance(is_valid, dict):
-        return is_valid
+    # if isinstance(is_valid, dict):
+    #     return is_valid
     
+    # if not is_valid:
+    #     return {"status":402, "message": "기본 이용을 전부 다 사용했습니다.", "data" : None}
+
     if not is_valid:
         return JSONResponse(
             status_code=402,
@@ -133,6 +143,9 @@ async def summarize_file(
 
     ## api 이용한 pdf 문서 요약
     summary_query = summary_prompt.format(input = summary_input)
+    # summary_message = [{'role': 'user', 'content': summary_query}]
+    completion = model.generate_content(summary_query)
+    summarized_input = completion.text
     summary_message = [{'role': 'user', 'content': summary_query}]
     completion = client.chat.completions.create(model='gpt-4o-mini', messages= summary_message)
     summarized_input = completion.choices[0].message.content
