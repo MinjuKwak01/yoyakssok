@@ -9,7 +9,6 @@ import fitz  # PyMuPDF
 import pymupdf4llm
 from utils.token_validator import verify_token
 import google.generativeai as genai
-import google.generativeai as genai
 from tempfile import NamedTemporaryFile
 
 from openai import OpenAI
@@ -26,14 +25,6 @@ SUMMARY_DIR = "summaries"
 os.makedirs(SUMMARY_DIR, exist_ok=True)
 
 load_dotenv()
-
-# client = OpenAI (
-#     api_key = os.getenv("OPENAI_API_KEY")
-# )
-
-
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = genai.GenerativeModel('gemini-2.5-flash')
 
 # client = OpenAI (
 #     api_key = os.getenv("OPENAI_API_KEY")
@@ -72,41 +63,35 @@ async def upload_file(
 async def summarize_file(
     upload_file_path: str,
     file_name: str,
-    authorization: Optional[str] = Header(None, description="Bearer token")
+    # authorization: Optional[str] = Header(None, description="Bearer token")
 ):
 
-    if not authorization or not authorization.startswith('Bearer '):
-        return JSONResponse(
-            status_code=401,
-            content={
-                "status": 401,
-                "message": "인증이 필요합니다",
-                "data": None
-            }
-        )
+    # if not authorization or not authorization.startswith('Bearer '):
+    #     return JSONResponse(
+    #         status_code=401,
+    #         content={
+    #             "status": 401,
+    #             "message": "인증이 필요합니다",
+    #             "data": None
+    #         }
+    #     )
     
-    token = authorization.split(' ')[1]
-    is_valid = await verify_token(token)
+    # token = authorization.split(' ')[1]
+    # is_valid = await verify_token(token)
 
-    if isinstance(is_valid, dict):
-        return is_valid
-    
-    if not is_valid:
-        return {"status":402, "message": "기본 이용을 전부 다 사용했습니다.", "data" : None}
+    # if isinstance(is_valid, dict):
+    #     return is_valid
 
-    if not is_valid:
-        return JSONResponse(
-            status_code=402,
-            content={
-                "status": 402,
-                "message": "기본 이용 횟수를 모두 사용했습니다.",
-                "data": None
-            }
-        )
+    # if not is_valid:
+    #     return JSONResponse(
+    #         status_code=402,
+    #         content={
+    #             "status": 402,
+    #             "message": "기본 이용 횟수를 모두 사용했습니다.",
+    #             "data": None
+    #         }
+    #     )
 
-    
-   
-    
     with open(upload_file_path, "r", encoding="utf-8") as upload_file:
         summary_input = upload_file.read()
 
@@ -125,7 +110,8 @@ async def summarize_file(
     표가 있다면 그대로 출력하세요.
     input의 내용에 없는 것을 추가하여 정리하지 마세요.
 
-    \n 이 때 정리된 내용은 반드시 구체적인 내용을 작성해주세요.
+    오로지 정리된 내용만 리턴합니다. 불필요한 주석 혹은 사족을 달지 마세요.
+    이 때 정리된 내용은 반드시 구체적인 내용을 작성해주세요.
     """
 
     summary_text = """
