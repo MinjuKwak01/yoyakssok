@@ -1,11 +1,10 @@
 name: Spring Boot CI/CD
-
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
-
+      - prod
+      - dev
 concurrency:
   group: ${{ github.ref }}
 
@@ -19,15 +18,38 @@ jobs:
       DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
       PROFILE: ${{ secrets.PROFILE }}
 
-  call-deploy-workflow:
+  deploy-to-production:
     needs: call-build-workflow
-    name: 서비스 배포
+    if: github.ref == 'refs/heads/prod'
+    name: Production 서버 배포
     uses: ./.github/workflows/deploy.yml
+    with:
+      environment: prod
     secrets:
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-      SSH_KEY: ${{ secrets.SSH_KEY }}
-      SSH_PORT: ${{ secrets.SSH_PORT }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+      SSH_USERNAME: ${{ secrets.PROD_SSH_USERNAME }}
+      SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+      SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
       REPO: ${{ secrets.REPO }}
-      WORKSPACE: ${{ secrets.WORKSPACE }}
-      DEPLOY_SCRIPT: ${{ secrets.DEPLOY_SCRIPT }}
+      WORKSPACE: ${{ secrets.PROD_WORKSPACE }}
+      DEPLOY_SCRIPT: ${{ secrets.PROD_DEPLOY_SCRIPT }}
+
+  deploy-to-dev:
+    needs: call-build-workflow
+    if: github.ref == 'refs/heads/dev'
+    name: Dev 서버 배포
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: dev
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
+      SSH_USERNAME: ${{ secrets.DEV_SSH_USERNAME }}
+      SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
+      SSH_PORT: ${{ secrets.DEV_SSH_PORT }}
+      REPO: ${{ secrets.REPO }}
+      WORKSPACE: ${{ secrets.DEV_WORKSPACE }}
+      DEPLOY_SCRIPT: ${{ secrets.DEV_DEPLOY_SCRIPT }}

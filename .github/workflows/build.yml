@@ -31,7 +31,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.12.1"
-          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/dev' }}
+          cache-read-only: ${{ github.ref != 'refs/heads/production' && github.ref != 'refs/heads/dev' }}
           gradle-home-cache-excludes: |
             caches/build-cache-1
       - name: Run Jib
@@ -44,5 +44,5 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
 
         run: |
-          cd BE/forever
+          cd BE
           ./gradlew jib
