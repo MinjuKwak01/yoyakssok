@@ -102,14 +102,10 @@ async def summarize_file(
     with open(upload_file_path, "r", encoding="utf-8") as upload_file:
         summary_input = upload_file.read()
 
-    summary_text = """
-   
-    ###input
-    {input} 
-    \n """
+
 
     summary_context = """\n 
-    위 input은 학생들의 학습 자료로서 제공 된 내용입니다.
+    아래 input은 학생들의 학습 자료로서 제공 된 내용입니다.
     학습을 위해 한글로 보기 좋게 정리해주세요. 레포트는 최대한 자세하게, 마크다운 형식으로 작성해주세요. \n
     학습 자료로서 복잡하고 전문적인 용어들이 자주 등장하며 용어의 중요도가 높은 편입니다.
     당신은 아주 중요한 시험을 준비하는 학생으로, input으로 제공된 학습 자료의 구체적이고 세부적인 내용까지 고려하여 정리합니다.
@@ -123,6 +119,12 @@ async def summarize_file(
 
     \n 이 때 정리된 내용은 반드시 구체적인 내용을 작성해주세요.
     """
+
+    summary_text = """
+   
+    ###input
+    {input} 
+    \n """
     # summary_template = """
     # 반환 형식은 다음과 같습니다. 이 프로젝트에서 일관적인 반환 형식은 매우 중요한 요소입니다. 
 
@@ -134,9 +136,9 @@ async def summarize_file(
     # """
 
     summary_prompt = (
-        + PromptTemplate.from_template(summary_text) 
-        + PromptTemplate.from_template(summary_context) 
+        PromptTemplate.from_template(summary_context) 
         + PromptTemplate.from_template(summary_example)
+        + PromptTemplate.from_template(summary_text) 
         # + summary_template
     )
 
@@ -146,9 +148,9 @@ async def summarize_file(
     # summary_message = [{'role': 'user', 'content': summary_query}]
     completion = model.generate_content(summary_query)
     summarized_input = completion.text
-    summary_message = [{'role': 'user', 'content': summary_query}]
-    completion = client.chat.completions.create(model='gpt-4o-mini', messages= summary_message)
-    summarized_input = completion.choices[0].message.content
+    # summary_message = [{'role': 'user', 'content': summary_query}]
+    # completion = client.chat.completions.create(model='gpt-4o-mini', messages= summary_message)
+    # summarized_input = completion.choices[0].message.content
 
     summary_file_path = os.path.join(SUMMARY_DIR, f"{file_name}_summary.txt")
     with open(summary_file_path, "w") as summarized_file:
