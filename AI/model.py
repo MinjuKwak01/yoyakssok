@@ -1,6 +1,6 @@
 from typing import List, Optional
 from fastapi import APIRouter, Request, UploadFile, Header, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import os
 import shutil
 import json
@@ -8,7 +8,7 @@ from pydantic import BaseModel
 import fitz  # PyMuPDF
 import pymupdf4llm
 from utils.token_validator import verify_token
-
+import google.generativeai as genai
 from tempfile import NamedTemporaryFile
 
 from openai import OpenAI
@@ -26,9 +26,14 @@ os.makedirs(SUMMARY_DIR, exist_ok=True)
 
 load_dotenv()
 
-client = OpenAI (
-    api_key = os.getenv("OPENAI_API_KEY")
-)
+# client = OpenAI (
+#     api_key = os.getenv("OPENAI_API_KEY")
+# )
+
+
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+model = genai.GenerativeModel('gemini-2.5-flash')
+
 
 # 경로 설정
 @upload.post('/upload')
@@ -58,63 +63,88 @@ async def upload_file(
 async def summarize_file(
     upload_file_path: str,
     file_name: str,
-    authorization: Optional[str] = Header(None, description="Bearer token")
+    # authorization: Optional[str] = Header(None, description="Bearer token")
 ):
-    if not authorization or not authorization.startswith('Bearer '):
-        return {"status":401, "message": "인증이 필요합니다", "data" : None}
-    
-    token = authorization.split(' ')[1]
-    is_valid = await verify_token(token)
 
-    if isinstance(is_valid, dict):
-        return is_valid
+    # if not authorization or not authorization.startswith('Bearer '):
+    #     return JSONResponse(
+    #         status_code=401,
+    #         content={
+    #             "status": 401,
+    #             "message": "인증이 필요합니다",
+    #             "data": None
+    #         }
+    #     )
     
-    if not is_valid:
-        return {"status":402, "message": "기본 이용을 전부 다 사용했습니다.", "data" : None}
+    # token = authorization.split(' ')[1]
+    # is_valid = await verify_token(token)
 
-    
-    with open(upload_file_path, "r") as upload_file:
+    # if isinstance(is_valid, dict):
+    #     return is_valid
+
+    # if not is_valid:
+    #     return JSONResponse(
+    #         status_code=402,
+    #         content={
+    #             "status": 402,
+    #             "message": "기본 이용 횟수를 모두 사용했습니다.",
+    #             "data": None
+    #         }
+    #     )
+
+    with open(upload_file_path, "r", encoding="utf-8") as upload_file:
         summary_input = upload_file.read()
 
-    summary_text = """input : {input} 
-    \n 위 input은 학생들의 학습 자료로서 제공 된 내용입니다."""
+
 
     summary_context = """\n 
+    아래 input은 학생들의 학습 자료로서 제공 된 내용입니다.
+    학습을 위해 한글로 보기 좋게 정리해주세요. 레포트는 최대한 자세하게, 마크다운 형식으로 작성해주세요. \n
     학습 자료로서 복잡하고 전문적인 용어들이 자주 등장하며 용어의 중요도가 높은 편입니다.
-    당신은 아주 중요한 시험을 준비하는 학생으로, input으로 제공된 학습 자료의 구체적이고 세부적인 내용까지 고려한 요약 레포트를 작성해야합니다.
+    당신은 아주 중요한 시험을 준비하는 학생으로, input으로 제공된 학습 자료의 구체적이고 세부적인 내용까지 고려하여 정리합니다.
     """
 
     summary_example = """
     또한 각각의 내용은 충분히 자세하고 세부적인 사항들을 포함하고 있어야 합니다.  
-    문서의 끝부분까지 확실하게 설명해주세요.
-    input의 내용에 없는 것을 추가하여 설명하지 마세요. 
-    요약에 부가적인 설명을 붙이지 마세요. 오로지 요약만 전달해야합니다.
+    요약하는 내용 없이 문서의 끝부분까지 확실하게 정리해서 보여주세요.
+    표가 있다면 그대로 출력하세요.
+    input의 내용에 없는 것을 추가하여 정리하지 마세요.
 
-    \n 이 때 설명은 반드시 구체적인 내용을 작성해주세요.
-    \n 예시로 '프로젝트 과제'에 대한 내용이 있다면 '프로젝트 과제 수행에는 레포트 작성, 유스케이스 작성 등이 있다'를 명시해주어야합니다.
+    오로지 정리된 내용만 리턴합니다. 불필요한 주석 혹은 사족을 달지 마세요.
+    이 때 정리된 내용은 반드시 구체적인 내용을 작성해주세요.
     """
-    summary_template = """
-    반환 형식은 다음과 같습니다. 이 프로젝트에서 일관적인 반환 형식은 매우 중요한 요소입니다. 
 
-    \n ### 1. 주제 1
-    \n 주제 1에 대한 내용 설명
-    ... 
-    \n 주제의 개수는 input에 따라 달라질 수 있습니다. 
+    summary_text = """
+   
+    ###input
+    {input} 
+    \n """
+    # summary_template = """
+    # 반환 형식은 다음과 같습니다. 이 프로젝트에서 일관적인 반환 형식은 매우 중요한 요소입니다. 
 
-    """
+    # \n ### 1. 주제 1
+    # \n 주제 1에 대한 내용 설명
+    # ... 
+    # \n 주제의 개수는 input에 따라 달라질 수 있습니다. 
+
+    # """
 
     summary_prompt = (
-        PromptTemplate.from_template(summary_text) 
-        + PromptTemplate.from_template(summary_context) 
-        + PromptTemplate.from_template(summary_example) 
-        + summary_template
+        PromptTemplate.from_template(summary_context) 
+        + PromptTemplate.from_template(summary_example)
+        + PromptTemplate.from_template(summary_text) 
+        # + summary_template
     )
+
 
     ## api 이용한 pdf 문서 요약
     summary_query = summary_prompt.format(input = summary_input)
-    summary_message = [{'role': 'user', 'content': summary_query}]
-    completion = client.chat.completions.create(model='gpt-3.5-turbo', messages= summary_message)
-    summarized_input = completion.choices[0].message.content
+    # summary_message = [{'role': 'user', 'content': summary_query}]
+    completion = model.generate_content(summary_query)
+    summarized_input = completion.text
+    # summary_message = [{'role': 'user', 'content': summary_query}]
+    # completion = client.chat.completions.create(model='gpt-4o-mini', messages= summary_message)
+    # summarized_input = completion.choices[0].message.content
 
     summary_file_path = os.path.join(SUMMARY_DIR, f"{file_name}_summary.txt")
     with open(summary_file_path, "w") as summarized_file:
@@ -139,8 +169,14 @@ async def make_questions(
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
     if not authorization or not authorization.startswith('Bearer '):
-        return {"status":401, "message": "인증이 필요합니다", "data" : None}
-    
+        return JSONResponse(
+            status_code=401,
+            content={
+                "status": 401,
+                "message": "인증이 필요합니다",
+                "data": None
+            }
+        )
     token = authorization.split(' ')[1]
     is_valid = await verify_token(token)
 
@@ -148,7 +184,14 @@ async def make_questions(
         return is_valid
     
     if not is_valid:
-        return {"status":402, "message": "기본 이용을 전부 다 사용했습니다.", "data": None}
+        return JSONResponse(
+            status_code=402,
+            content={
+                "status": 402,
+                "message": "기본 이용 횟수를 모두 사용했습니다.",
+                "data": None
+            }
+        )
 
     
     with open(summarized_file_path, "r") as summarized_file:
@@ -209,6 +252,7 @@ async def make_questions(
             "name": "generate_questions",
             "description": """입력받은 내용을 기반으로 하여 심도있는 쪽지시험 문제와 그 답을 만들어야합니다. 
             문제와 답안은 한국어로 출력해주세요.  
+            만약 전문 용어가 들어있다면 (의학 및 공학 용어 등) 그 용어를 임의로 번역하지 말고 그대로 사용해주세요.
 
             답안은 존댓말을 사용하지 마세요.
 
@@ -221,7 +265,7 @@ async def make_questions(
     query = question_prompt.format(q_input = summarized_input) + question_query 
     message = [{'role': 'user', 'content': query}]
     questions = client.chat.completions.create(
-        model='gpt-3.5-turbo',
+        model='gpt-4o',
         messages=message ,
         functions = functions,
         function_call = {"name" : "generate_questions"}
@@ -236,7 +280,7 @@ async def make_questions(
         for attempt in range(max_retries):
             try:
                 response = await client.post(
-                    "https://yoyakssok-dev.duckdns.org/api/summary/complete",  
+                    "https://yoyakssok.com/api/summary/complete",  
                     headers={"Authorization": f"Bearer {token}"},
                     json={"isComplete": True},
                     timeout=10.0
@@ -269,6 +313,12 @@ async def start_model(authorization: Optional[str] = Header(None, description="B
     token = authorization.split(' ')[1]
     is_valid = await verify_token(token)
     if not is_valid:
-        return {"status" : 401, "message" : "기본 이용을 전부 다 사용했습니다.", "data" : None}
-
+        return JSONResponse(
+            status_code=401,
+            content={
+                "status" : 401,
+                "message" : "기본 이용을 전부 다 사용했습니다.",
+                "data" : None
+            }
+        )
     return {'message': "model"}
