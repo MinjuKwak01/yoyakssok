@@ -1,5 +1,6 @@
 package com.example.forever.service;
 
+import com.example.forever.application.notification.DocumentCreatedNotificationService;
 import com.example.forever.common.validator.DocumentAuthorizationValidator;
 import com.example.forever.common.validator.DocumentValidator;
 import com.example.forever.common.validator.QuestionAuthorizationValidator;
@@ -59,6 +60,7 @@ public class DocumentService {
     private final DocumentValidator documentValidator;
     private final ItemRepository itemRepository;
     private final FolderRepository folderRepository;
+    private final DocumentCreatedNotificationService documentCreatedNotificationService;
 
     @Transactional
     public DocumentSummaryResponse saveDocumentSummary(DocumentSummaryRequest request, MemberInfo memberInfo) {
@@ -101,6 +103,10 @@ public class DocumentService {
                 .orderValue(newOrderValue)
                 .build();
         itemRepository.save(item);
+        
+        // 문서 생성 후 마일스톤 체크
+        documentCreatedNotificationService.checkAndSendMilestoneNotification(member);
+        
         // 5. 응답
         return new DocumentSummaryResponse(savedDocument.getId());
     }
